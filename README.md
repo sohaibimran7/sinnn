@@ -1,5 +1,5 @@
 # sinnn
- Sohiab Imran's Numpy Neural Network. Work in progress 🔨
+ Sohiab Imran's Numpy Neural Network. Work in progress 🔨 .
  To do:
  1) Complete Model Class
  2) Complete Class Diagram
