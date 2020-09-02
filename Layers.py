@@ -11,7 +11,7 @@ class Layer:
         """ Initialise layer parameters """
         pass
 
-    def forward(self):
+    def forward(self, X):
         """ Propogate input throught the layer to calculate layer outputs """
         pass
 
@@ -21,15 +21,21 @@ class Layer:
 
 
 class ReLU(Layer):
-    def __init__(self):
+    def __init__(self, **kwargs):
         """Relu layer aplies relu to inputs 1:1 fashion"""
         self.input = None
+        self.output = None
         pass
 
-    def forward(self, input):
+    def reset(self):
+        self.input = None
+        self.output = None
+
+    def forward(self, X):
         """If input > 0 return input else return 0"""
-        self.input = input
-        return np.maximum(self.input, 0.0)
+        self.input = X
+        self.output = np.maximum(self.input, 0.0)
+        return self.output
 
     def backward(self, grad_output):
         """compute DL/DX only since no weights"""
@@ -44,16 +50,24 @@ class Dense(Layer):
     Performs the transformation f(X) = X @ W and backprops
     """
 
-    def __init__(self, neurons, weights_initialiser="SmallRandom", bias_initialiser="Zeros", optimiser="SGD"):
+    def __init__(self, neurons, **kwargs):
         """Initialise layer parameters"""
         self.neurons = neurons
-        self.weights_initialiser = getattr(Initialisers, weights_initialiser)()
-        self.bias_initialiser = getattr(Initialisers, bias_initialiser)()
         self.weights_init = None
         self.biases_init = None
         self.weights = None
         self.input = None
-        self.optimiser = getattr(Optimisers, optimiser)()
+        self.output = None
+        self.weights_initialiser = None
+        self.bias_initialiser = None
+        self.optimiser = None
+        allowed_keys = {'weights_initialiser', 'bias_initialiser', 'optimiser'}
+        self.__dict__.update((k, v) for k, v in kwargs.items() if k in allowed_keys)
+
+    def objectify(self):
+        self.weights_initialiser = getattr(Initialisers, self.weights_initialiser)()
+        self.bias_initialiser = getattr(Initialisers, self.bias_initialiser)()
+        self.optimiser = getattr(Optimisers, self.optimiser)()
 
     def init_weights(self, input_dim):
         """Initialise dense layer weights. Requires shape/neurons/coloumns of input"""
@@ -61,26 +75,35 @@ class Dense(Layer):
 
     def init_biases(self):
         """Initialise dense layer weights. Requires shape/neurons/coloumns of input"""
-        self.biases_init = self.weights_initialiser.initialise(1, self.neurons)
+        self.biases_init = self.bias_initialiser.initialise(1, self.neurons)
 
     def reset(self):
         """
         Resets learnable layer parameters.
         Weights shape: [input_dim + 1, neurons]
         """
+        self.input = None
+        self.output = None
         self.weights = np.vstack((self.biases_init, self.weights_init))
         self.optimiser.reset()
 
-    def forward(self, input):
+    def forward(self, X):
         """
         Calculates y = X @ W
 
         X shape: [batch, input_dim + 1]
         Y shape: [batch, neurons]
         """
+        # Initialising weights for first time use
+        if not self.weights:
+            self.objectify()
+            self.init_weights(X.shape[1])
+            self.init_biases()
+            self.reset()
         # adding a neuron/column of ones to support bias in weights matrix
-        self.input = np.hstack((np.ones((input.shape[0], 1)), input))
-        return np.dot(self.input, self.weights)
+        self.input = np.hstack((np.ones((X.shape[0], 1)), input))
+        self.output = np.dot(self.input, self.weights)
+        return self.output
 
     def backward(self, grad_output):
         """
