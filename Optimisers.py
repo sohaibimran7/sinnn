@@ -8,14 +8,14 @@ class Optimiser:
         """ Reset optimiser parameters"""
         pass
 
-    def optimise(self):
+    def optimise(self, weights, grad_weights):
         """ Optimise using parameters"""
         pass
 
 
 class SGD(Optimiser):
     """ Implements stochastic gradient descent. """
-    def __init(self, learning_rate=0.1):
+    def __init__(self, learning_rate=0.01):
         self.learning_rate = learning_rate
 
     def reset(self):
@@ -27,7 +27,7 @@ class SGD(Optimiser):
 
 class Momentum(Optimiser):
     """ Implements stochastic gradient descent with Momentum. """
-    def __init(self, learning_rate=0.1, eta=0.9):
+    def __init__(self, learning_rate=0.01, eta=0.9):
         self.learning_rate = learning_rate
         self.eta = eta
         self.momentum = None

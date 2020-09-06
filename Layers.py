@@ -11,11 +11,14 @@ class Layer:
         """ Initialise layer parameters """
         pass
 
-    def forward(self, X):
+    def reset(self):
+        pass
+
+    def forward(self, x):
         """ Propogate input throught the layer to calculate layer outputs """
         pass
 
-    def backward(self):
+    def backward(self, grad_output):
         """ Backpropogate incoming gradient to adjust layer parameters and inputs """
         pass
 
@@ -31,11 +34,10 @@ class ReLU(Layer):
         self.input = None
         self.output = None
 
-    def forward(self, X):
+    def forward(self, x):
         """If input > 0 return input else return 0"""
-        self.input = X
+        self.input = x
         self.output = np.maximum(self.input, 0.0)
-        return self.output
 
     def backward(self, grad_output):
         """compute DL/DX only since no weights"""
@@ -87,7 +89,7 @@ class Dense(Layer):
         self.weights = np.vstack((self.biases_init, self.weights_init))
         self.optimiser.reset()
 
-    def forward(self, X):
+    def forward(self, x):
         """
         Calculates y = X @ W
 
@@ -95,15 +97,14 @@ class Dense(Layer):
         Y shape: [batch, neurons]
         """
         # Initialising weights for first time use
-        if not self.weights:
+        if self.weights is None:
             self.objectify()
-            self.init_weights(X.shape[1])
+            self.init_weights(x.shape[1])
             self.init_biases()
             self.reset()
         # adding a neuron/column of ones to support bias in weights matrix
-        self.input = np.hstack((np.ones((X.shape[0], 1)), input))
+        self.input = np.hstack((np.ones((x.shape[0], 1)), x))
         self.output = np.dot(self.input, self.weights)
-        return self.output
 
     def backward(self, grad_output):
         """
