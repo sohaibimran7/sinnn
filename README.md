@@ -9,6 +9,6 @@ Dependencies:
  1) Numpy
 
 Optional dependencies: Only to run example.py
- 2) Tensorflow*
- 3) Matplotlib*
+ 2) Tensorflow
+ 3) Matplotlib
  
