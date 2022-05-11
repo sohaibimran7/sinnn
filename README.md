@@ -1,5 +1,5 @@
 # sinnn
- Sohiab Imran's Numpy Neural Network.\
+ Sohaib Imran's Numpy Neural Network.\
  sinnn is a numpy powered low code neural network library. 
  
  
